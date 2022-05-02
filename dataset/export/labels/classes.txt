@@ -1,4 +1,4 @@
-liscence plate
+license plate
 package
 waybill
 id card
