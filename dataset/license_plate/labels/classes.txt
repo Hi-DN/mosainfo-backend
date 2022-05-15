@@ -1,4 +1,1 @@
 license plate
-package
-waybill
-id card
