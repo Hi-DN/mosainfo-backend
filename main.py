@@ -2,7 +2,6 @@ from flask import Flask,jsonify
 import cv2
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 from time import time, sleep
 import os
 import signal
@@ -14,6 +13,24 @@ app = Flask(__name__)
 
 CONN_LIMIT=10   
 possible_list = [True] * CONN_LIMIT
+
+# 현재 작동중인 프로세스 리스트 조회
+@app.route("/processes")
+def getProcessList():
+    process_data_list = []
+
+    for i in range(CONN_LIMIT):
+        if not possible_list[i]:
+            process_data = {
+                'result' : 'true',
+                'id': i
+            }
+            process_data_list.append(process_data)
+
+    json_data = {
+        'list': process_data_list
+    }
+    return jsonify(json_data)
 
 # 촬영 시작 -> 지정 번호 get
 @app.route("/get-id")
@@ -49,7 +66,7 @@ def releaseNumber(id):
     return jsonify({'result':'true'})
 
 
-# 모자이킈 시작
+# 모자이크 시작
 @app.route("/mosaic/<id>")
 def mosaic(id):
     pid=os.fork()
@@ -66,8 +83,9 @@ def work(id):
     mosaicObject = MosaicObject();
     mosaicObject.__init__
 
-    cap=cv2.VideoCapture("rtmp://43.201.36.38/live/{id}")
-    rtmp_out_url = "rtmp://43.201.36.38/live-out/{id}"
+    base_url = "rtmp://15.164.170.6/"
+    cap=cv2.VideoCapture(base_url + "live/{id}")
+    rtmp_out_url = base_url + "live-out/{id}"
 
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
@@ -168,4 +186,4 @@ class MosaicObject:
 
 # 서버 start
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port='8282', debug=True)
+    app.run(host='0.0.0.0', port='8282', debug=True)
