@@ -6,8 +6,7 @@ from time import time, sleep
 import os
 import signal
 
-# import ffmpeg
-# import subprocess
+import ffmpeg
 
 app = Flask(__name__)
 
@@ -42,9 +41,10 @@ def getId():
             'result' : 'true',
             'id':id
         }
-    else : json_data={
-        'result':'false',
-        'message': 'connection limit...'
+    else : 
+        json_data={
+            'result':'false',
+            'message': 'connection limit...'
         }
 
     return jsonify(json_data)
@@ -69,6 +69,7 @@ def releaseNumber(id):
 # 모자이크 시작
 @app.route("/mosaic/<id>")
 def mosaic(id):
+    print("mosaic")
     pid=os.fork()
     if pid == 0:
         my_pid = os.getpid()
@@ -83,7 +84,7 @@ def work(id):
     mosaicObject = MosaicObject();
     mosaicObject.__init__
 
-    base_url = "rtmp://15.164.170.6/"
+    base_url = "rtmp://13.125.225.121/"
     cap=cv2.VideoCapture(base_url + "live/{id}")
     rtmp_out_url = base_url + "live-out/{id}"
 
@@ -96,7 +97,7 @@ def work(id):
         vcodec='libx264', 
         pix_fmt='yuv420p', 
         preset='veryfast', 
-        r='20', g='50', 
+        r=str(fps), g='50', 
         video_bitrate='1.4M', 
         maxrate='2M', 
         bufsize='2M', 
@@ -144,9 +145,9 @@ class MosaicObject:
 
     # 모델 설정
     def load_model(self):
-        # model=torch.hub.load('ultralytics/yolov5', 'custom', path='plate.pt')
+        model=torch.hub.load('ultralytics/yolov5', 'custom', path='/Users/hssarah/Projects/mosainfo-backend/weights/all_combined_models/all_combined_v1.2_r45.pt')
         # model=torch.hub.load('ultralytics/yolov5', 'custom', path='yolov5s')
-        model = torch.hub.load('ultralytics/yolov5','yolov5s')
+        # model = torch.hub.load('ultralytics/yolov5','yolov5s')
         return model
 
     # 프레임별로 inference 진행 -> 인식한 label 및 정보 반환
@@ -186,4 +187,4 @@ class MosaicObject:
 
 # 서버 start
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='8282', debug=True)
+    app.run(host='0.0.0.0', port='8282', debug=False, use_reloader=False)
