@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import torch
+import torchvision.models as models
 from time import time, sleep
 import os
 import signal
@@ -13,7 +14,7 @@ import subprocess
 
 base_url = "rtmp://3.34.97.138/"
 
-waybill_weight = "/content/waybill_v1.2_r45.pt "
+waybill_weight = "/content/waybill_v1.2_r45.pt"
 plate_weight="/content/plate.pt"
 combined_weight="/content/all_combined_v2.3.2_flip.pt"
 
@@ -24,10 +25,11 @@ DataLoader.num_workers=0
 
 CONN_LIMIT=10   
 possible_list = [True] * CONN_LIMIT
+q = [0,1,2,3,4,5,6,7,8,9]
 
 # 현재 작동중인 프로세스 리스트 조회
-@app.route("/processes")
-def getProcessList():
+@app.route("/processes/prev")
+def getProcessList_prev():
     process_data_list = []
 
     for i in range(CONN_LIMIT):
@@ -43,9 +45,27 @@ def getProcessList():
     }
     return jsonify(json_data)
 
+
+@app.route("/processes")
+def getProcessList():
+    process_data_list = []
+
+    for i in q:
+      process_data = {
+            'result' : 'true',
+            'id': i
+      }
+      process_data_list.append(process_data)
+
+    json_data = {
+        'list': process_data_list
+    }
+    return jsonify(json_data)
+
+
 # 촬영 시작 -> 지정 번호 get
-@app.route("/get-id")
-def getId():
+@app.route("/get-id/prev")
+def getId_prev():
     id=findPossibleId()
 
     if id!=-1 : 
@@ -61,6 +81,23 @@ def getId():
     return jsonify(json_data)
 
 
+@app.route("/get-id")
+def getId():
+
+    if len(q)==0 : 
+        json_data={
+        'result':'false',
+        'message': 'connection limit...'
+        }
+    else : 
+          json_data={
+            'result' : 'true',
+            'id': q.pop(0)
+        }
+
+    return jsonify(json_data)
+
+
 def findPossibleId():
     for i in range(0,CONN_LIMIT):
         if(possible_list[i]) : 
@@ -69,9 +106,16 @@ def findPossibleId():
     return -1
 
 # 촬영 종료 -> 지정 번호 release
+@app.route("/release/<id>/prev")
+def releaseNumber_prev(id):
+    possible_list[int(id)]=True
+    print('release id : ',id)
+
+    return jsonify({'result':'true'})
+
 @app.route("/release/<id>")
 def releaseNumber(id):
-    possible_list[int(id)]=True
+    q.append(int(id))
     print('release id : ',id)
 
     return jsonify({'result':'true'})
@@ -97,8 +141,6 @@ def mosaic(id):
 
 
 def work(id):
-
-    base_url = "rtmp://54.180.93.241/"
     
     rtmp_in_url = base_url + "live/"+str(id)
     rtmp_out_url = base_url + "live-out/"+str(id)
@@ -113,7 +155,6 @@ def work(id):
            '-y',
            '-f', 'rawvideo',
            '-vcodec', 'rawvideo',
-          #  '-acodec', 'copy',
            '-pix_fmt', 'bgr24',
            '-s', "{}x{}".format(width, height),
            '-r', str(fps),
@@ -126,7 +167,7 @@ def work(id):
   
     p=subprocess.Popen(command,stdin=subprocess.PIPE)
 
-    mosaicObject = MosaicObject();
+    mosaicObject = MosaicObject()
     mosaicObject.__init__
 
     sleep(1)
@@ -153,7 +194,6 @@ def work(id):
     cap.release()
     print('cap release! id=',str(id))
     cv2.destroyAllWindows()
-
 
 class MosaicObject:
 
@@ -199,7 +239,7 @@ class MosaicObject:
                 mosaic_part=cv2.blur(mosaic_part,(50,50))   
 
                 frame[top:bottom,left:right]=mosaic_part    # 해당 범위 모자이크처리한걸 원본에 덮어쓰기
-
+        
         return frame
 
 
