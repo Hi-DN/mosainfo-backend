@@ -2,12 +2,15 @@ import cv2
 import numpy as np
 import torch
 import torchvision.models as models
+from torch.utils.data import DataLoader
+
 from time import time, sleep
+from datetime import datetime
 import os
 import signal
-from flask import Flask, jsonify
+
+from flask import Flask, jsonify,request
 from flask_ngrok import run_with_ngrok
-from torch.utils.data import DataLoader
 
 import ffmpeg
 import subprocess
@@ -19,106 +22,95 @@ plate_weight="/content/plate.pt"
 combined_weight="/content/all_combined_v2.3.2_flip.pt"
 
 app = Flask(__name__)
-run_with_ngrok(app) 
+# run_with_ngrok(app) 
 
 DataLoader.num_workers=0
 
 CONN_LIMIT=10   
-possible_list = [True] * CONN_LIMIT
-q = [0,1,2,3,4,5,6,7,8,9]
+possible_id_queue = [0,1,2,3,4,5,6,7,8,9]
+working_streaming_queue=[]
+
+class Streaming:
+    def __init__(self, streaming_id, streaming_title, streaming_category,streaming_start_time):
+        self.streaming_id=streaming_id # 스트림 id
+        self.streaming_title=streaming_title # 스트림 제목
+        self.streaming_category=streaming_category # 스트림 카테고리
+        self.streaming_start_time = streaming_start_time # 스트림 시작시간
+
+def deleteStreamingById(streaming_id):
+    for i in range(len(working_streaming_queue)):
+        if(working_streaming_queue[i].streaming_id == int(streaming_id)):
+            working_streaming_queue.pop(i)
+            break
+
 
 # 현재 작동중인 프로세스 리스트 조회
-@app.route("/processes/prev")
-def getProcessList_prev():
-    process_data_list = []
-
-    for i in range(CONN_LIMIT):
-        if not possible_list[i]:
-            process_data = {
-                'result' : 'true',
-                'id': i
-            }
-            process_data_list.append(process_data)
-
-    json_data = {
-        'list': process_data_list
-    }
-    return jsonify(json_data)
-
-
 @app.route("/processes")
 def getProcessList():
     process_data_list = []
 
-    for i in q:
-      process_data = {
-            'result' : 'true',
-            'id': i
-      }
-      process_data_list.append(process_data)
+    for streaming in working_streaming_queue:
+        process_data_list.append(streaming.__dict__)
 
     json_data = {
         'list': process_data_list
     }
-    return jsonify(json_data)
 
+    return jsonify(json_data)
 
 # 촬영 시작 -> 지정 번호 get
-@app.route("/get-id/prev")
-def getId_prev():
-    id=findPossibleId()
+@app.route("/streaming",methods=['POST'])
+def createStreaming():
+    assigned_id = -1
 
-    if id!=-1 : 
-        json_data={
-            'result' : 'true',
-            'id':id
-        }
-    else : json_data={
-        'result':'false',
-        'message': 'connection limit...'
-        }
-
-    return jsonify(json_data)
-
-
-@app.route("/get-id")
-def getId():
-
-    if len(q)==0 : 
+    if len(possible_id_queue)==0 : 
         json_data={
         'result':'false',
         'message': 'connection limit...'
         }
+
     else : 
-          json_data={
+        assigned_id = possible_id_queue.pop(0)
+        title = request.args.get('title')
+        category = request.args.get('category')
+        now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+
+        new_streaming = Streaming(assigned_id,title,category,now)
+        working_streaming_queue.append(new_streaming)
+
+        json_data={
             'result' : 'true',
-            'id': q.pop(0)
+            'streaming': new_streaming.__dict__
         }
 
     return jsonify(json_data)
 
 
-def findPossibleId():
-    for i in range(0,CONN_LIMIT):
-        if(possible_list[i]) : 
-            possible_list[i]=False
-            return i
-    return -1
 
 # 촬영 종료 -> 지정 번호 release
-@app.route("/release/<id>/prev")
-def releaseNumber_prev(id):
-    possible_list[int(id)]=True
-    print('release id : ',id)
-
-    return jsonify({'result':'true'})
-
 @app.route("/release/<id>")
 def releaseNumber(id):
-    q.append(int(id))
-    print('release id : ',id)
+    # 진행 프로세스 큐에서 삭제
+    deleteStreamingById(id)
 
-    return jsonify({'result':'true'})
+    # 할당 id 큐 맨끝으로 반환
+    possible_id_queue.append(int(id))
+
+    print('release id : ',id)
+    return jsonify({
+        'result':'true',
+        'id': id
+    })
+
+
+# 특정 id 로 스트리밍 실행중인가 조회
+@app.route("/streaming/<id>")
+def isStreamingExists(id):
+    for streaming in working_streaming_queue:
+        if streaming.streaming_id==int(id):
+            return jsonify({'result':'true'})
+     
+    return jsonify({'result':'false'})
 
 
 # 모자이크 시작
@@ -243,6 +235,10 @@ class MosaicObject:
         return frame
 
 
+# # 서버 start
+# if __name__ == "__main__":
+#     app.run()
+
 # 서버 start
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port='8282', debug=True)
