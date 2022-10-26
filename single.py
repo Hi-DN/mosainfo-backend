@@ -73,6 +73,7 @@ def run():
   width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
   height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+
   mosaicObject = MosaicObject();
   mosaicObject.__init__
 
@@ -119,6 +120,3 @@ def run():
 
 if __name__ == '__main__':
   run()
-
-
-
