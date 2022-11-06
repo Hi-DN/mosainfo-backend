@@ -22,13 +22,15 @@ plate_weight="/content/plate.pt"
 combined_weight="/content/all_combined_v2.3.2_flip.pt"
 
 app = Flask(__name__)
-# run_with_ngrok(app) 
+run_with_ngrok(app) 
 
 DataLoader.num_workers=0
 
 CONN_LIMIT=10   
 possible_id_queue = [0,1,2,3,4,5,6,7,8,9]
 working_streaming_queue=[]
+
+mosaic_on_off_list=[True,True,True,True,True,True,True,True,True,True]
 
 class Streaming:
     def __init__(self, streaming_id, streaming_title, streaming_category,streaming_start_time):
@@ -113,6 +115,35 @@ def isStreamingExists(id):
     return jsonify({'result':'false'})
 
 
+# 모자이크 on 
+@app.route("/mosaic/on/<id>")
+def onMosaic(id):
+    id=int(id)
+
+    print('==before== mosaic on?',str(mosaic_on_off_list[id]))
+    mosaic_on_off_list[id]=True
+    print('==after== mosaic on?',str(mosaic_on_off_list[id]))
+    
+    return jsonify({
+        'result':'true',
+        'mosaic': mosaic_on_off_list[id]
+        })
+
+# 모자이크 off
+@app.route("/mosaic/off/<id>")
+def offMosaic(id):  
+    id=int(id)
+
+    print('==before== mosaic on?',str(mosaic_on_off_list[id]))
+    mosaic_on_off_list[id]=False
+    print('==after== mosaic on?',str(mosaic_on_off_list[id]))
+    
+    return jsonify({
+        'result':'true',
+        'mosaic': mosaic_on_off_list[id]
+        })
+
+
 # 모자이크 시작
 @app.route("/mosaic/<id>")
 def mosaic(id):
@@ -172,15 +203,16 @@ def work(id):
         print('can not read!')
         break
 
-      results=mosaicObject.score_frame(frame)
-      frame=mosaicObject.mosaic_frame(results,frame)
+      if mosaic_on_off_list[id]:
+        results=mosaicObject.score_frame(frame)
+        frame=mosaicObject.mosaic_frame(results,frame)
 
       # rtmp 서버로 push
       p.stdin.write(frame.tobytes())
       
       end_time=time()
       fps=1/np.round(end_time-start_time,3)
-      print(f"FPS = {fps}")
+    #   print(f"FPS = {fps}")
 
 
     cap.release()
