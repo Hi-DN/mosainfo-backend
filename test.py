@@ -26,12 +26,18 @@ def deleteStreamingById(streaming_id):
 
 
 # 현재 작동중인 프로세스 리스트 조회
-@app.route("/processes")
+@app.route("/streamings")
 def getProcessList():
     process_data_list = []
-
-    for streaming in working_streaming_queue:
-        process_data_list.append(streaming.__dict__)
+    category = request.args.get('category')
+    
+    if category==None:
+        for streaming in working_streaming_queue:
+            process_data_list.append(streaming.__dict__)
+    else:
+        for streaming in working_streaming_queue:
+            if (streaming.streaming_category==category):
+                process_data_list.append(streaming.__dict__)
 
     json_data = {
         'list': process_data_list
