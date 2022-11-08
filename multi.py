@@ -97,6 +97,7 @@ def releaseNumber(id):
 
     # 할당 id 큐 맨끝으로 반환
     possible_id_queue.append(int(id))
+    mosaic_on_off_list[int(id)]=True
 
     print('release id : ',id)
     return jsonify({
@@ -164,7 +165,7 @@ def mosaic(id):
 
 
 def work(id):
-    
+    id=int(id)
     rtmp_in_url = base_url + "live/"+str(id)
     rtmp_out_url = base_url + "live-out/"+str(id)
 
