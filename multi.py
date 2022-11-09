@@ -96,13 +96,13 @@ def createStreaming():
 # 촬영 종료 -> 지정 번호 release
 @app.route("/release/<id>")
 def releaseNumber(id):
-    # 진행 프로세스 큐에서 삭제
-    deleteStreamingById(id)
-
-    # 할당 id 큐 맨끝으로 반환
-    possible_id_queue.append(int(id))
-
-    print('release id : ',id)
+    for streaming in working_streaming_queue:
+        if streaming.streaming_id==int(id):
+            print("process exist, release!!")
+            deleteStreamingById(id) # 진행 프로세스 큐에서 삭제
+            possible_id_queue.append(int(id)) # 할당 id 큐 맨끝으로 반환
+            break
+        
     return jsonify({
         'result':'true',
         'id': id
@@ -159,7 +159,7 @@ def work(id):
            '-i', '-',
            '-c:v', 'libx264',
            '-pix_fmt', 'yuv420p',
-           '-preset', 'ultrafast',
+           '-preset', 'veryfast',
            '-f', 'flv',
            rtmp_out_url]
   
@@ -241,10 +241,6 @@ class MosaicObject:
         return frame
 
 
-# # 서버 start
-# if __name__ == "__main__":
-#     app.run()
-
 # 서버 start
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='8282', debug=True)
+    app.run()
