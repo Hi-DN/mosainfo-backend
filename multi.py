@@ -22,7 +22,7 @@ plate_weight="/content/plate.pt"
 combined_weight="/content/all_combined_v2.3.2_flip.pt"
 
 app = Flask(__name__)
-# run_with_ngrok(app) 
+run_with_ngrok(app) 
 
 DataLoader.num_workers=0
 
