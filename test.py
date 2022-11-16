@@ -77,13 +77,13 @@ def createStreaming():
 # 촬영 종료 -> 지정 번호 release
 @app.route("/release/<id>")
 def releaseNumber(id):
-    # 진행 프로세스 큐에서 삭제
-    deleteStreamingById(id)
-
-    # 할당 id 큐 맨끝으로 반환
-    possible_id_queue.append(int(id))
-
-    print('release id : ',id)
+    for streaming in working_streaming_queue:
+        if streaming.streaming_id==int(id):
+            print("process exist, release!!")
+            deleteStreamingById(id) # 진행 프로세스 큐에서 삭제
+            possible_id_queue.append(int(id)) # 할당 id 큐 맨끝으로 반환
+            break
+        
     return jsonify({
         'result':'true',
         'id': id
