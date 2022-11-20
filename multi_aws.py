@@ -10,16 +10,14 @@ import os
 import signal
 
 from flask import Flask, jsonify,request
-from flask_ngrok import run_with_ngrok
 
 import ffmpeg
 import subprocess
 
 base_url = "rtmp://13.209.4.86/"
-combined_weight="/content/best.pt"
+combined_weight="/home/ubuntu/best.pt"
 
 app = Flask(__name__)
-run_with_ngrok(app) 
 
 DataLoader.num_workers=0
 
@@ -267,4 +265,4 @@ class MosaicObject:
 
 # 서버 start
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
