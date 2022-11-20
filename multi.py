@@ -1,22 +1,19 @@
 import cv2
 import numpy as np
 import torch
-import torchvision.models as models
 from torch.utils.data import DataLoader
 
 from time import time
 from datetime import datetime
 import os
-import signal
 
 from flask import Flask, jsonify,request
 from flask_ngrok import run_with_ngrok
 
-import ffmpeg
 import subprocess
 
 base_url = "rtmp://13.209.4.86/"
-combined_weight="/content/best.pt"
+combined_weight="/content/final_flip.pt"
 
 app = Flask(__name__)
 run_with_ngrok(app) 
@@ -53,7 +50,7 @@ method : GET
 현재 작동중인 프로세스 리스트를 조회합니다.
 '''
 @app.route("/streamings")
-def getProcessList():
+def getStreamingList():
     process_data_list = []
     category = request.args.get('category')
     
@@ -142,13 +139,19 @@ method : GET
 '''
 @app.route("/mosaic/<id>")
 def mosaic(id):
+    id = int(id)
     pid=os.fork()
 
     #child
     if pid == 0:
         my_pid = os.getpid()
         print('>>>>>>>>>>>>>>>>>>>>>>>>> fork(), pid=',my_pid,'id=',id)
-        work(id)
+        
+        if id == 0:
+            work_video_replay(id)
+        else: 
+            work(id)
+            
         os._exit(id)
 
     #parent
@@ -187,6 +190,7 @@ def work(id):
            '-c:v', 'libx264',
            '-pix_fmt', 'yuv420p',
            '-preset', 'veryfast',
+           '-g', '250',
            '-f', 'flv',
            rtmp_out_url]
   
@@ -215,6 +219,65 @@ def work(id):
 
 
     cap.release()
+    print('cap release! id=',str(id))
+    releaseNumber(id)
+    cv2.destroyAllWindows()
+
+
+def work_video_replay(id):
+
+    video_source = "/content/video_source/plate480.mp4"
+    rtmp_out_url = base_url + "live-out/"+str(id)
+
+    cap=cv2.VideoCapture(video_source)
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    command = ['ffmpeg',
+          '-y',
+          '-f', 'rawvideo',
+          '-vcodec', 'rawvideo',
+          '-pix_fmt', 'bgr24',
+          '-s', "{}x{}".format(width, height),
+          '-r', '30',
+          '-i', '-',
+          '-c:v', 'libx264',
+          '-pix_fmt', 'yuv420p',
+          '-preset', 'veryfast',
+          '-g', '250',
+          '-f', 'flv',
+          rtmp_out_url]
+  
+    
+    p=subprocess.Popen(command,stdin=subprocess.PIPE)
+
+    mosaicObject = MosaicObject()
+    mosaicObject.__init__
+
+    while isStreamingExists(id):
+
+      cap=cv2.VideoCapture(video_source)
+
+      while cap.isOpened():
+        start_time = time()
+
+        status, frame = cap.read()
+        if not status : 
+          print('reset to start')
+          break
+
+        results=mosaicObject.score_frame(frame)
+        frame=mosaicObject.mosaic_frame(results,frame)
+
+        # rtmp 서버로 push
+        p.stdin.write(frame.tobytes())
+        
+        end_time=time()
+        fps=1/np.round(end_time-start_time,3)
+        print(f"FPS = {fps}")
+      cap.release()
+    
     print('cap release! id=',str(id))
     releaseNumber(id)
     cv2.destroyAllWindows()
