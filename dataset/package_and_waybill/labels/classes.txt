@@ -1,4 +1,0 @@
-licence plate
-package
-waybill
-id card
