@@ -28,15 +28,16 @@ Real-time Pixelizing Personal Information Multi-Streaming Application &nbsp;&nbs
 이를 해결하기 위한 방안으로, 실시간으로 개인정보 모자이크를 진행하는 멀티 스트리밍 애플리케이션을 개발하게 되었습니다.
 
 ### 개인정보 모자이크 대상
+모자이크 대상으로는, 다음 3가지를 선정하였습니다.
 - 택배 운송장
 - 차량 번호판
 - 신분증
 
 
 ### Real-time Pixelizing Personal Information Multi-Streaming Application**<br/>
-With the rapid development of the Internet in recent years, platforms that provide real-time streaming broadcasting have also grown significantly. It's a double-edged sword with serious side effects behind it. One of them is the "Risk of personal information disclosure." Through news and articles, we have been able to find a number of cases in which personal information has been exposed to Internet video in recent years. This exposure of personal information is likely to lead to crime. In addition, compared to ordinary videos, personal information leak in real-time streaming is considered to be more serious since the video is immediately delivered to the viewers, so they don't have enough time to  handle it.
+With the rapid development of the Internet in recent years, platforms that provide real-time streaming broadcasting have also grown significantly. It's a double-edged sword with serious side effects behind it. One of them is the "Risk of personal information disclosure." Through news and articles, we have been able to find a number of cases in which personal information has been exposed to Internet video in recent years. This exposure of personal information is likely to lead to crime. In addition, compared to ordinary videos, personal information leak in real-time streaming is considered to be more serious since the video is immediately delivered to the viewers, so they don't have enough time to handle it.
 
-As a way to solve this problem, we developed a multi-streaming application that mosaic personal information in real time.
+As a way to solve this problem, we developed a multi-streaming application that pixelizes personal information in real time.
 
 ### Pixelized Personal Information Target**
 - Invoices On Packages
