@@ -1,6 +1,6 @@
 # MOSAINFO
-실시간 개인정보 모자이크 멀티 스트리밍 애플리케이션 <br/>
-Real-time Pixelizing Personal Information Multi-Streaming Application &nbsp;&nbsp;&nbsp;&nbsp;
+**실시간 개인정보 모자이크 멀티 스트리밍 애플리케이션** <br/>
+**Real-time Pixelizing Personal Information Multi-Streaming Application** &nbsp;&nbsp;&nbsp;&nbsp;
 [<img src="https://img.shields.io/badge/youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white">](https://www.youtube.com/watch?v=KwK6oQNaHkc)
 
 
@@ -22,19 +22,25 @@ Real-time Pixelizing Personal Information Multi-Streaming Application &nbsp;&nbs
 <img width="800px" alt="title" src="https://user-images.githubusercontent.com/51855129/219096865-7d469368-8e6e-4918-9e05-8dd2b553579b.png">
 </div>
 
-### 실시간 개인정보 모자이크 멀티 스트리밍 애플리케이션
+### 주기능
+라이브 스트리밍에서 개인 정보가 등장하면 인공지능이 감지하여 실시간으로 자동 모자이크를 처리합니다.
+
+### 개발 배경
 최근 몇년간 인터넷이 급속도로 발전함에 따라 실시간 스트리밍 방송을 제공하는 플랫폼들 역시 크게 성장했습니다. 이는 양날의 검으로, 그 이면에는 심각한 부작용이 존재합니다. 그중 하나로는 “개인정보 노출의 위험성”이 있습니다. 저희는 뉴스와 기사를 통해 최근 몇 년간 인터넷 영상에 개인정보가 노출되어 문제가 된 사례들을 다수 발견할 수 있었습니다. 이러한 개인정보 노출은 범죄로 이어질 가능성이 다분합니다. 추가적으로 일반 영상에 비해, 실시간 스트리밍은 시청자들에게 영상이 즉시 전달되기 때문에 수습할 시간이 주어지지 않아 그 심각성이 더욱 크다고 생각됩니다. 
 
 이를 해결하기 위한 방안으로, 실시간으로 개인정보 모자이크를 진행하는 멀티 스트리밍 애플리케이션을 개발하게 되었습니다.
 
-### 개인정보 모자이크 대상
+### 개인 정보 모자이크 대상
 모자이크 대상으로는, 다음 3가지를 선정하였습니다.
 - 택배 운송장
 - 차량 번호판
 - 신분증
 
 
-### Real-time Pixelizing Personal Information Multi-Streaming Application<br/>
+### Main Feature
+When personal information appears in live streaming, artificial intelligence detects and automatically prcess pixelizing in real time.
+
+### Project Background<br/>
 With the rapid development of the Internet in recent years, platforms that provide real-time streaming broadcasting have also grown significantly. It's a double-edged sword with serious side effects behind it. One of them is the "Risk of personal information disclosure." Through news and articles, we have been able to find a number of cases in which personal information has been exposed to Internet video in recent years. This exposure of personal information is likely to lead to crime. In addition, compared to ordinary videos, personal information leak in real-time streaming is considered to be more serious since the video is immediately delivered to the viewers, so they don't have enough time to handle it.
 
 As a way to solve this problem, we developed a multi-streaming application that pixelizes personal information in real time.
